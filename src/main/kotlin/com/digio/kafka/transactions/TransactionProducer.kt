@@ -1,5 +1,6 @@
 package com.digio.kafka.transactions
 
+import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.ser.std.StringSerializer
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -7,6 +8,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.Properties
 import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerRecord
+import java.util.Timer
+import java.util.TimerTask
+import java.util.stream.IntStream
 
 class TransactionProducer {
     companion object {
@@ -33,6 +38,28 @@ class TransactionProducer {
         val producer = KafkaProducer<String, String>(properties)
 
         // Do the thing.
+        val repeatedTask = object: TimerTask() {
+            override fun run() {
+                // Write 1 per second - ramp this up to 100 when we get moving!
+                IntStream.range(0, 1).forEach { _ ->
+                    val transaction = legacyBankingSystem.getTransaction()           ;
+                    logger.info("Transaction {}", transaction);
+                    try {
+                        producer.send(ProducerRecord(
+                                "transaction-topic",
+                                transaction.customer,
+                                objectMapper.writeValueAsString(transaction)))
+                    } catch (ex: JsonProcessingException) {
+                        logger.info("Could not write out my transaction!")
+                    }
+                }
+                producer.flush();
+            }
+        };
+        val timer = Timer("Timer");
+        val delay = 1000L;
+        val period = 1000L;
+        timer.scheduleAtFixedRate(repeatedTask, delay, period);
 
         // Close to producer gracefully
         Runtime.getRuntime().addShutdownHook(Thread(producer::close))
