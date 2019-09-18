@@ -10,6 +10,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
+import org.apache.kafka.streams.kstream.Consumed
 import org.apache.kafka.streams.kstream.GlobalKTable
 import org.apache.kafka.streams.kstream.KStream
 import org.apache.kafka.streams.kstream.Windowed
@@ -31,11 +32,20 @@ class StreamingTopology {
         }
 
         fun createStream(builder: StreamsBuilder): KStream<String, Transaction>? {
-            return null
+            return builder.stream("transaction-topic", Consumed.with(Serdes.StringSerde(), TransactionSerde()))
         }
 
         fun computeTotals(kStream: KStream<String, Transaction>?): KStream<String, Long>? {
-            return null
+            return kStream?.groupByKey()
+                ?.aggregate(
+                    Function{0L},
+                    {
+                        key, value, aggregate ->
+                        aggregate + value.amount
+                    },
+                    Materalized.with(Serdes.StringSerde(), Serdes.LongSerde())
+                )
+                .toStream()
         }
 
         fun computeRunningTotal(kStream: KStream<String, Transaction>?): KStream<Windowed<String>, Long>? {
