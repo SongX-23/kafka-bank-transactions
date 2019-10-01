@@ -15,9 +15,7 @@ import org.apache.kafka.streams.kstream.GlobalKTable
 import org.apache.kafka.streams.kstream.KStream
 import org.apache.kafka.streams.kstream.Windowed
 import org.apache.kafka.streams.kstream.Produced
-
-
-
+import org.apache.kafka.streams.kstream.Materialized
 
 class StreamingTopology {
     companion object {
@@ -38,14 +36,14 @@ class StreamingTopology {
         fun computeTotals(kStream: KStream<String, Transaction>?): KStream<String, Long>? {
             return kStream?.groupByKey()
                 ?.aggregate(
-                    Function{0L},
+                    {0L},
                     {
-                        key, value, aggregate ->
+                        _, value, aggregate ->
                         aggregate + value.amount
                     },
-                    Materalized.with(Serdes.StringSerde(), Serdes.LongSerde())
+                    Materialized.with(Serdes.StringSerde(), Serdes.LongSerde())
                 )
-                .toStream()
+                ?.toStream()
         }
 
         fun computeRunningTotal(kStream: KStream<String, Transaction>?): KStream<Windowed<String>, Long>? {

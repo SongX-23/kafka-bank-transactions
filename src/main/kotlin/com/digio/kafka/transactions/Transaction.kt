@@ -3,7 +3,7 @@ package com.digio.kafka.transactions
 import java.math.BigDecimal
 
 data class Transaction(val customer: String,
-                       val amount: BigDecimal,
+                       val amount: Long,
                        val category: String,
                        val occurred: Long) {
 
