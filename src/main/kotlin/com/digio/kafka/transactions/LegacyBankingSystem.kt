@@ -13,9 +13,9 @@ class LegacyBankingSystem {
     fun getTransaction(): Transaction {
         return Transaction(
             randomCustomer(),
-            rand.nextInt(100).toBigDecimal(),
+            rand.nextInt(100).toLong(),
             randomCategory(),
-            Date().getTime()
+            Date().time
             )
     }
 
