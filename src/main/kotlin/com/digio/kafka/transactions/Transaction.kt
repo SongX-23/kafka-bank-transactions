@@ -1,7 +1,5 @@
 package com.digio.kafka.transactions
 
-import java.math.BigDecimal
-
 data class Transaction(val customer: String,
                        val amount: Long,
                        var category: String,
@@ -15,4 +13,6 @@ data class Transaction(val customer: String,
                 ", occurred=" + occurred +
                 '}';
     }
+
+    constructor() : this("", 0, "", 0)
 }
