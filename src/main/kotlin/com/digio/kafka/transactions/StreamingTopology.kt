@@ -19,6 +19,7 @@ import org.apache.kafka.streams.kstream.Materialized
 import org.apache.kafka.streams.kstream.TimeWindows
 import java.util.concurrent.TimeUnit
 
+
 class StreamingTopology {
   companion object {
     private val logger: Logger = LoggerFactory.getLogger(TransactionProducer::class.java.name)
@@ -97,6 +98,13 @@ class StreamingTopology {
     val totalStream = computeTotals(stream)
     val windowedLongKStream = computeRunningTotal(stream)
     val enhancedTransactions = categorisedStream(stream!!, createCategoryLookupTable(builder))
+
+    totalStream?.to("customer-total-topic", stringLongProduced)
+    windowedLongKStream?.selectKey { key, _ -> key.toString() }
+        ?.to("customer-rolling-total-topic", stringLongProduced)
+    enhancedTransactions
+        .peek { _, value -> logger.info(value.toString()) }
+        .to("enhanced-transactions-topic", Produced.with<String, Transaction>(Serdes.StringSerde(), TransactionSerde()))
   }
 
   fun main(args: Array<String>) {
