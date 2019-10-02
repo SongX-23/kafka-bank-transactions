@@ -4,7 +4,7 @@ import java.math.BigDecimal
 
 data class Transaction(val customer: String,
                        val amount: Long,
-                       val category: String,
+                       var category: String,
                        val occurred: Long) {
 
     override fun toString(): String {
