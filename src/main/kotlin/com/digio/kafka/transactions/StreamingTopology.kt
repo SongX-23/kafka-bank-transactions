@@ -13,10 +13,12 @@ import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Consumed
 import org.apache.kafka.streams.kstream.GlobalKTable
 import org.apache.kafka.streams.kstream.KStream
+import org.apache.kafka.streams.kstream.KeyValueMapper
 import org.apache.kafka.streams.kstream.Windowed
 import org.apache.kafka.streams.kstream.Produced
 import org.apache.kafka.streams.kstream.Materialized
 import org.apache.kafka.streams.kstream.TimeWindows
+import org.apache.kafka.streams.kstream.ValueJoiner
 import java.util.concurrent.TimeUnit
 
 
@@ -74,14 +76,13 @@ class StreamingTopology {
     fun categorisedStream(kStream: KStream<String, Transaction>, kTable: GlobalKTable<String, String>)
         : KStream<String, Transaction> {
       return kStream.leftJoin<String, String, Transaction>(kTable,
-          { _: String, transaction: Transaction ->
+          KeyValueMapper { _: String, transaction: Transaction ->
             transaction.category
           },
-          { transaction: Transaction, category: String ->
+          ValueJoiner { transaction: Transaction, category: String ->
             transaction.category = category
             transaction
           })
-      //return kStream?.leftJoin(kTable, this::keyValueMapper, this::valueJoiner)
     }
 
     fun topology(builder: StreamsBuilder) {
