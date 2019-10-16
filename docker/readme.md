@@ -16,3 +16,16 @@ curl -X POST -H "Content-Type: application/json" -d @connect-mongodb-total-sink.
 
 org.apache.kafka.connect.storage.StringConverter
 org.apache.kafka.connect.json.JsonConverter
+
+## Mongo Replica Set config
+
+Need to use mongo shell to initialize replica set
+```sh
+docker exec -it mongo1 mongo
+```
+
+Inside mongo shell run the following code
+```sh
+config={"_id":"rs0","members":[{"_id":0,"host":"mongo1:27017"},{"_id":1,"host":"mongo2:27017"},{"_id":2,"host":"mongo3:27017"}]}
+rs.initiate(config)
+```

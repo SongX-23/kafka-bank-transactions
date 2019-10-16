@@ -1,16 +1,12 @@
 {
-  "config" : {
+  "config": {
     "name": "MongoSourceConnector",
     "connector.class": "com.mongodb.kafka.connect.MongoSourceConnector",
     "tasks.max": "1",
-    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
-    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-    "connection.uri": "mongodb://admin:admin@kafka-connect-cluster-shard-00-00-buthq.mongodb.net:27017,kafka-connect-cluster-shard-00-01-buthq.mongodb.net:27017,kafka-connect-cluster-shard-00-02-buthq.mongodb.net:27017/test?ssl=true&replicaSet=Kafka-Connect-Cluster-shard-0&authSource=admin&retryWrites=true&w=majority",
+    "connection.uri": "mongodb://mongo1:27017,mongo2:27017,mongo3:27017",
     "database": "test",
     "collection": "category",
-    "ssl.enabled" : true,
-    "initial.sync.max.threads" : 1,
-    "pipeline": "[{\"$match\": {\"operationType\": \"insert\"}}]"
-},
-  "name" : "MongoSourceConnector"
+    "topic.prefix": "mongo1"
+  },
+  "name": "MongoSourceConnector"
 }

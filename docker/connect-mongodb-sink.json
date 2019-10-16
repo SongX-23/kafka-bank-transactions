@@ -8,7 +8,7 @@
     "key.converter" : "org.apache.kafka.connect.storage.StringConverter",
     "value.converter" : "org.apache.kafka.connect.json.JsonConverter",
     "connector.class" : "com.mongodb.kafka.connect.MongoSinkConnector",
-    "connection.uri" : "mongodb://mongo/test?retryWrites=true",
+    "connection.uri" : "mongodb://mongo1:27017,mongo2:27017,mongo3:27017",
     "collection" : "EnhancedTransactions",
     "database" : "test",
     "transforms.WrapKey.field" : "_id",

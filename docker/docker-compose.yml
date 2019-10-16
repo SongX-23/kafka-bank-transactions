@@ -1,29 +1,59 @@
 ---
-version: '2'
+version: '3.6'
 services:
-  mongo:
-    image: mongo
-    hostname: mongo
-    container_name: mongo
-    restart: always
+  # MongoDB Replica Set
+  mongo1:
+    image: "mongo:4.0-xenial"
+    container_name: mongo1
+    command: --replSet rs0 --smallfiles --oplogSize 128
+    volumes:
+      - rs1:/data/db
+    networks:
+      - localnet
     ports:
       - "27017:27017"
-    expose:
-      - "27017"
+    restart: always
+  mongo2:
+    image: "mongo:4.0-xenial"
+    container_name: mongo2
+    command: --replSet rs0 --smallfiles --oplogSize 128
+    volumes:
+      - rs2:/data/db
+    networks:
+      - localnet
+    ports:
+      - "27018:27017"
+    restart: always
+  mongo3:
+    image: "mongo:4.0-xenial"
+    container_name: mongo3
+    command: --replSet rs0 --smallfiles --oplogSize 128
+    volumes:
+      - rs3:/data/db
+    networks:
+      - localnet
+    ports:
+      - "27019:27017"
+    restart: always
 
   mongoclient:
     image: mongoclient/mongoclient:2.2.0
     container_name: mongoclient
     hostname: mongoclient
     depends_on:
-      - mongo
+      - mongo1
+      - mongo2
+      - mongo3
     ports:
       - 3000:3000
     environment:
-      MONGO_URL: "mongodb://mongo:27017"
+      MONGO_URL: "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet=rs0"
       PORT: 3000
     expose:
       - "3000"
+    networks:
+      - localnet
+
   zookeeper:
     image: confluentinc/cp-zookeeper:5.3.1
     hostname: zookeeper
@@ -33,6 +63,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - localnet
 
   broker:
     image: confluentinc/cp-enterprise-kafka:5.3.1
@@ -56,7 +88,8 @@ services:
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       CONFLUENT_METRICS_ENABLE: 'true'
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
-
+    networks:
+      - localnet
 
   connect:
     image: cnfldemos/kafka-connect-datagen:0.1.3-5.3.1
@@ -65,9 +98,13 @@ services:
     depends_on:
       - zookeeper
       - broker
-      - mongo
+      - mongo1
+      - mongo2
+      - mongo3
     ports:
       - "8083:8083"
+    networks:
+      - localnet
     volumes:
       - ./connect:/usr/share/java/kafka-connect-libs
     environment:
@@ -98,6 +135,8 @@ services:
     image: confluentinc/cp-enterprise-control-center:5.3.1
     hostname: control-center
     container_name: control-center
+    networks:
+      - localnet
     depends_on:
       - zookeeper
       - broker
@@ -114,3 +153,11 @@ services:
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
       PORT: 9021
 
+networks:
+  localnet:
+    attachable: true
+
+volumes:
+  rs1:
+  rs2:
+  rs3:
