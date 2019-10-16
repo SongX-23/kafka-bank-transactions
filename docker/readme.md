@@ -29,3 +29,27 @@ Inside mongo shell run the following code
 config={"_id":"rs0","members":[{"_id":0,"host":"mongo1:27017"},{"_id":1,"host":"mongo2:27017"},{"_id":2,"host":"mongo3:27017"}]}
 rs.initiate(config)
 ```
+
+### Some useful mongo shell command
+- Create collection  
+```
+db.createCollection(<name>)
+# Example
+db.createCollection("category")
+```
+- List collections in current database  
+```
+db.getCollectionNames()
+```
+- Insert one document
+```
+db.<collection>.insertOne({<payload>})
+# Example
+db.category.insertOne({_id:1, code: "CG01", name: "Food"})
+``` 
+- Find and replace one document
+```
+db.<collection>.findOneAndReplace({<filter>}, {<new_payload>})
+# Example
+db.category.insertOne({_id:1, code: "CG01", name: "Drink"})
+```
